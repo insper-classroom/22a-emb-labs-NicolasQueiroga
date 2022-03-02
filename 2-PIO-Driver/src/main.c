@@ -45,6 +45,8 @@ void _pio_clear(Pio *, const uint32_t);
 void _pio_pull_up(Pio *, const uint32_t, const uint32_t);
 void _pio_set_input(Pio *, const uint32_t, const uint32_t);
 void _pio_set_output(Pio *, const uint32_t, const uint32_t, const uint32_t, const uint32_t);
+void _delay_ms(int);
+uint32_t _pio_get(Pio *, const pio_type_t, const uint32_t);
 void init(void);
 void blink(Pio *, const uint32_t);
 
@@ -97,17 +99,38 @@ void _pio_set_output(Pio *p_pio, const uint32_t ul_mask, const uint32_t ul_defau
 	p_pio->PIO_PER = ul_mask;
 }
 
+uint32_t _pio_get(Pio *p_pio, const pio_type_t ul_type, const uint32_t ul_mask)
+{
+	uint32_t ul_reg;
+
+	if ((ul_type == PIO_OUTPUT_0) || (ul_type == PIO_OUTPUT_1))
+		ul_reg = p_pio->PIO_ODSR;
+	else
+		ul_reg = p_pio->PIO_PDSR;
+
+	if ((ul_reg & ul_mask) == 0)
+		return 0;
+	else
+		return 1;
+}
+
+void _delay_ms(int ms)
+{
+	for (int i = 0; i < (ms * 150000); i++)
+		asm("NOP");
+}
+
 void blink(Pio *pio, const uint32_t mask)
 {
 	int cnt = -1;
 	while (++cnt < 5)
 	{
 		_pio_set(pio, mask);
-		delay_ms(100);
+		_delay_ms(100);
 		_pio_clear(pio, mask);
-		delay_ms(100);
+		_delay_ms(100);
 	}
-	pio_set(pio, mask);
+	_pio_set(pio, mask);
 }
 
 void init(void)
@@ -146,10 +169,10 @@ int main(void)
 	init();
 	while (1)
 	{
-		_Bool btn = !pio_get(BUT_PIO, PIO_INPUT, BUT_PIO_IDX_MASK);
-		_Bool btn1 = !pio_get(BUT1_PIO, PIO_INPUT, BUT1_PIO_IDX_MASK);
-		_Bool btn2 = !pio_get(BUT2_PIO, PIO_INPUT, BUT2_PIO_IDX_MASK);
-		_Bool btn3 = !pio_get(BUT3_PIO, PIO_INPUT, BUT3_PIO_IDX_MASK);
+		_Bool btn = !_pio_get(BUT_PIO, PIO_INPUT, BUT_PIO_IDX_MASK);
+		_Bool btn1 = !_pio_get(BUT1_PIO, PIO_INPUT, BUT1_PIO_IDX_MASK);
+		_Bool btn2 = !_pio_get(BUT2_PIO, PIO_INPUT, BUT2_PIO_IDX_MASK);
+		_Bool btn3 = !_pio_get(BUT3_PIO, PIO_INPUT, BUT3_PIO_IDX_MASK);
 
 		if (btn)
 			blink(LED_PIO, LED_PIO_IDX_MASK);
