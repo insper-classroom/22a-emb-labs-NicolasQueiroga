@@ -84,14 +84,14 @@ void get_frequency()
 {
 	for (int i = 0; i < 10000000; i++)
 	{
-		if (i >= 1000000 && !pio_get(BUT_PIO, PIO_INPUT, BUT_PIO_IDX_MASK))
+		if (!pio_get(BUT1_PIO, PIO_INPUT, BUT1_PIO_IDX_MASK) && i >= 1000000)
 		{
 			frequencia += 100;
 			delay_ms(300);
 			draw_frequency(frequencia);
 			break;
 		}
-		else if (i < 1000000 && !pio_get(BUT_PIO, PIO_INPUT, BUT_PIO_IDX_MASK))
+		else if (pio_get(BUT1_PIO, PIO_INPUT, BUT1_PIO_IDX_MASK) || !pio_get(BUT3_PIO, PIO_INPUT, BUT3_PIO_IDX_MASK) && i < 1000000)
 		{
 			frequencia -= 100;
 			delay_ms(300);
@@ -104,7 +104,7 @@ void get_frequency()
 void draw_frequency(int frequencia)
 {
 	char freq_str[20];
-	gfx_mono_draw_string("             ", 0,16, &sysfont);
+	gfx_mono_draw_string("             ", 0, 16, &sysfont);
 	sprintf(freq_str, "%d ms", frequencia);
 	gfx_mono_draw_string(freq_str, 0, 16, &sysfont);
 }
@@ -137,19 +137,19 @@ void init(void)
 	gfx_mono_ssd1306_init();
 	WDT->WDT_MR = WDT_MR_WDDIS;
 
-	// btn
-	pmc_enable_periph_clk(BUT_PIO_ID);
-	pio_configure(BUT_PIO, PIO_INPUT, BUT_PIO_IDX_MASK, PIO_PULLUP | PIO_DEBOUNCE);
-	pio_set_debounce_filter(BUT_PIO, BUT_PIO_IDX_MASK, 60);
-	pio_handler_set(BUT_PIO,
-					BUT_PIO_ID,
-					BUT_PIO_IDX_MASK,
+	// btn1
+	pmc_enable_periph_clk(BUT1_PIO_ID);
+	pio_configure(BUT1_PIO, PIO_INPUT, BUT1_PIO_IDX_MASK, PIO_PULLUP | PIO_DEBOUNCE);
+	pio_set_debounce_filter(BUT1_PIO, BUT1_PIO_IDX_MASK, 60);
+	pio_handler_set(BUT1_PIO,
+					BUT1_PIO_ID,
+					BUT1_PIO_IDX_MASK,
 					PIO_IT_EDGE,
-					but_callback);
-	pio_enable_interrupt(BUT_PIO, BUT_PIO_IDX_MASK);
-	pio_get_interrupt_status(BUT_PIO);
-	NVIC_EnableIRQ(BUT_PIO_ID);
-	NVIC_SetPriority(BUT_PIO_ID, 4);
+					but1_callback);
+	pio_enable_interrupt(BUT1_PIO, BUT1_PIO_IDX_MASK);
+	pio_get_interrupt_status(BUT1_PIO);
+	NVIC_EnableIRQ(BUT1_PIO_ID);
+	NVIC_SetPriority(BUT1_PIO_ID, 4);
 
 	// btn2
 	pmc_enable_periph_clk(BUT2_PIO_ID);
@@ -165,19 +165,19 @@ void init(void)
 	NVIC_EnableIRQ(BUT2_PIO_ID);
 	NVIC_SetPriority(BUT2_PIO_ID, 4);
 
-	// // btn3
-	// pmc_enable_periph_clk(BUT3_PIO_ID);
-	// pio_configure(BUT3_PIO, PIO_INPUT, BUT3_PIO_IDX_MASK, PIO_PULLUP | PIO_DEBOUNCE);
-	// pio_set_debounce_filter(BUT3_PIO, BUT3_PIO_IDX_MASK, 60);
-	// pio_handler_set(BUT3_PIO,
-	// 				BUT3_PIO_ID,
-	// 				BUT3_PIO_IDX_MASK,
-	// 				PIO_IT_FALL_EDGE,
-	// 				but3_callback);
-	// pio_enable_interrupt(BUT3_PIO, BUT3_PIO_IDX_MASK);
-	// pio_get_interrupt_status(BUT3_PIO);
-	// NVIC_EnableIRQ(BUT3_PIO_ID);
-	// NVIC_SetPriority(BUT3_PIO_ID, 4);
+	// btn3
+	pmc_enable_periph_clk(BUT3_PIO_ID);
+	pio_configure(BUT3_PIO, PIO_INPUT, BUT3_PIO_IDX_MASK, PIO_PULLUP | PIO_DEBOUNCE);
+	pio_set_debounce_filter(BUT3_PIO, BUT3_PIO_IDX_MASK, 60);
+	pio_handler_set(BUT3_PIO,
+					BUT3_PIO_ID,
+					BUT3_PIO_IDX_MASK,
+					PIO_IT_FALL_EDGE,
+					but3_callback);
+	pio_enable_interrupt(BUT3_PIO, BUT3_PIO_IDX_MASK);
+	pio_get_interrupt_status(BUT3_PIO);
+	NVIC_EnableIRQ(BUT3_PIO_ID);
+	NVIC_SetPriority(BUT3_PIO_ID, 4);
 
 	// led2
 	pmc_enable_periph_clk(LED2_PIO_ID);
@@ -191,7 +191,7 @@ void main(void)
 
 	while (1)
 	{
-		if (but_flag || but2_flag)
+		if (but1_flag || but2_flag || but3_flag)
 		{
 			if (pio_get(BUT2_PIO, PIO_INPUT, BUT2_PIO_IDX_MASK))
 				get_frequency();
@@ -202,8 +202,9 @@ void main(void)
 				pisca_led(30, frequencia);
 			}
 			draw_frequency(frequencia);
-			but_flag = 0;
+			but1_flag = 0;
 			but2_flag = 0;
+			but3_flag = 0;
 		}
 		pmc_sleep(SAM_PM_SMODE_SLEEP_WFI);
 	}
