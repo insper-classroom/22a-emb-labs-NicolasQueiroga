@@ -44,26 +44,20 @@
 #define BUT3_PIO_IDX 19
 #define BUT3_PIO_IDX_MASK (1u << BUT3_PIO_IDX)
 
-volatile char but_flag = 0;
 volatile char but1_flag = 0;
 volatile char but2_flag = 0;
 volatile char but3_flag = 0;
 
-volatile int frequencia = 500;
+volatile int frequency = 500;
 
 void init(void);
-void but_callback(void);
 void but1_callback(void);
 void but2_callback(void);
 void but3_callback(void);
 void get_frequency();
-void draw_frequency(int frequencia);
+void draw_frequency(int frequency);
 void pisca_led(int n, int t);
 
-void but_callback(void)
-{
-	but_flag = 1;
-}
 
 void but1_callback(void)
 {
@@ -82,30 +76,37 @@ void but3_callback(void)
 
 void get_frequency()
 {
+	if (but3_flag)
+	{
+		frequency -= 100;
+		delay_ms(300);
+		draw_frequency(frequency);
+		return;
+	}
 	for (int i = 0; i < 10000000; i++)
 	{
 		if (!pio_get(BUT1_PIO, PIO_INPUT, BUT1_PIO_IDX_MASK) && i >= 1000000)
 		{
-			frequencia += 100;
+			frequency -= 100;
 			delay_ms(300);
-			draw_frequency(frequencia);
+			draw_frequency(frequency);
 			break;
 		}
-		else if (pio_get(BUT1_PIO, PIO_INPUT, BUT1_PIO_IDX_MASK) || !pio_get(BUT3_PIO, PIO_INPUT, BUT3_PIO_IDX_MASK) && i < 1000000)
+		else if (pio_get(BUT1_PIO, PIO_INPUT, BUT1_PIO_IDX_MASK) && i < 1000000)
 		{
-			frequencia -= 100;
+			frequency += 100;
 			delay_ms(300);
-			draw_frequency(frequencia);
+			draw_frequency(frequency);
 			break;
 		}
 	}
 }
 
-void draw_frequency(int frequencia)
+void draw_frequency(int frequency)
 {
 	char freq_str[20];
 	gfx_mono_draw_string("             ", 0, 16, &sysfont);
-	sprintf(freq_str, "%d ms", frequencia);
+	sprintf(freq_str, "%d ms", frequency);
 	gfx_mono_draw_string(freq_str, 0, 16, &sysfont);
 }
 
@@ -144,7 +145,7 @@ void init(void)
 	pio_handler_set(BUT1_PIO,
 					BUT1_PIO_ID,
 					BUT1_PIO_IDX_MASK,
-					PIO_IT_EDGE,
+					PIO_IT_FALL_EDGE,
 					but1_callback);
 	pio_enable_interrupt(BUT1_PIO, BUT1_PIO_IDX_MASK);
 	pio_get_interrupt_status(BUT1_PIO);
@@ -199,9 +200,9 @@ void main(void)
 			{
 				delay_ms(200);
 				but2_flag = 0;
-				pisca_led(30, frequencia);
+				pisca_led(30, frequency);
 			}
-			draw_frequency(frequencia);
+			draw_frequency(frequency);
 			but1_flag = 0;
 			but2_flag = 0;
 			but3_flag = 0;
