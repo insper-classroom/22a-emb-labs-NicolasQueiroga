@@ -84,17 +84,17 @@ void get_frequency()
 {
 	for (int i = 0; i < 10000000; i++)
 	{
-		if (i >= 1000000 && !but_flag)
+		if (i >= 1000000 && !pio_get(BUT_PIO, PIO_INPUT, BUT_PIO_IDX_MASK))
 		{
 			frequencia += 100;
 			delay_ms(300);
 			draw_frequency(frequencia);
 			break;
 		}
-		else if (i < 1000000 && but_flag)
+		else if (i < 1000000 && !pio_get(BUT_PIO, PIO_INPUT, BUT_PIO_IDX_MASK))
 		{
 			frequencia -= 100;
-			delay_ms(200);
+			delay_ms(300);
 			draw_frequency(frequencia);
 			break;
 		}
@@ -104,7 +104,7 @@ void get_frequency()
 void draw_frequency(int frequencia)
 {
 	char freq_str[20];
-	sprintf(freq_str, "%d ms", frequencia);
+	sprintf(freq_str, "%d ms ", frequencia);
 	gfx_mono_draw_string(freq_str, 5, 16, &sysfont);
 }
 
@@ -125,6 +125,7 @@ void pisca_led(int n, int t)
 			break;
 		}
 	}
+	return;
 }
 
 void init(void)
@@ -143,7 +144,7 @@ void init(void)
 	pio_handler_set(BUT_PIO,
 					BUT_PIO_ID,
 					BUT_PIO_IDX_MASK,
-					PIO_IT_FALL_EDGE,
+					PIO_IT_EDGE,
 					but_callback);
 	pio_enable_interrupt(BUT_PIO, BUT_PIO_IDX_MASK);
 	pio_get_interrupt_status(BUT_PIO);
@@ -164,6 +165,20 @@ void init(void)
 	NVIC_EnableIRQ(BUT2_PIO_ID);
 	NVIC_SetPriority(BUT2_PIO_ID, 4);
 
+	// // btn3
+	// pmc_enable_periph_clk(BUT3_PIO_ID);
+	// pio_configure(BUT3_PIO, PIO_INPUT, BUT3_PIO_IDX_MASK, PIO_PULLUP | PIO_DEBOUNCE);
+	// pio_set_debounce_filter(BUT3_PIO, BUT3_PIO_IDX_MASK, 60);
+	// pio_handler_set(BUT3_PIO,
+	// 				BUT3_PIO_ID,
+	// 				BUT3_PIO_IDX_MASK,
+	// 				PIO_IT_FALL_EDGE,
+	// 				but3_callback);
+	// pio_enable_interrupt(BUT3_PIO, BUT3_PIO_IDX_MASK);
+	// pio_get_interrupt_status(BUT3_PIO);
+	// NVIC_EnableIRQ(BUT3_PIO_ID);
+	// NVIC_SetPriority(BUT3_PIO_ID, 4);
+
 	// led2
 	pmc_enable_periph_clk(LED2_PIO_ID);
 	pio_configure(LED2_PIO, PIO_OUTPUT_0, LED2_PIO_IDX_MASK, PIO_DEFAULT);
@@ -173,12 +188,13 @@ void main(void)
 {
 	init();
 	gfx_mono_draw_string("LAB 3", 0, 16, &sysfont);
+	_Bool btn2 = !pio_get(BUT2_PIO, PIO_INPUT, BUT2_PIO_IDX_MASK);
 
 	while (1)
 	{
 		if (but_flag)
 		{
-			if (pio_get(BUT2_PIO, PIO_INPUT, BUT2_PIO_IDX_MASK))
+			if (!btn2)
 			{
 				get_frequency();
 			}
@@ -189,6 +205,7 @@ void main(void)
 				pisca_led(30, frequencia);
 				break;
 			}
+			draw_frequency(frequencia);
 			but_flag = 0;
 			but2_flag = 0;
 		}
