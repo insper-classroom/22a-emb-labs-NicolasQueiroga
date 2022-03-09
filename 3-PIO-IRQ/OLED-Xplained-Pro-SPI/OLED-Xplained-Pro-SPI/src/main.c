@@ -104,8 +104,8 @@ void get_frequency()
 void draw_frequency(int frequencia)
 {
 	char freq_str[20];
-	sprintf(freq_str, "%d ms ", frequencia);
-	gfx_mono_draw_string(freq_str, 5, 16, &sysfont);
+	sprintf(freq_str, "%d ms       ", frequencia);
+	gfx_mono_draw_string(freq_str, 0, 16, &sysfont);
 }
 
 void pisca_led(int n, int t)
@@ -125,7 +125,6 @@ void pisca_led(int n, int t)
 			break;
 		}
 	}
-	return;
 }
 
 void init(void)
@@ -187,23 +186,19 @@ void init(void)
 void main(void)
 {
 	init();
-	gfx_mono_draw_string("LAB 3", 0, 16, &sysfont);
-	_Bool btn2 = !pio_get(BUT2_PIO, PIO_INPUT, BUT2_PIO_IDX_MASK);
+	gfx_mono_draw_string("     LAB 3", 0, 16, &sysfont);
 
 	while (1)
 	{
-		if (but_flag)
+		if (but_flag || but2_flag)
 		{
-			if (!btn2)
-			{
+			if (pio_get(BUT2_PIO, PIO_INPUT, BUT2_PIO_IDX_MASK))
 				get_frequency();
-			}
 			else
 			{
 				delay_ms(200);
 				but2_flag = 0;
 				pisca_led(30, frequencia);
-				break;
 			}
 			draw_frequency(frequencia);
 			but_flag = 0;
