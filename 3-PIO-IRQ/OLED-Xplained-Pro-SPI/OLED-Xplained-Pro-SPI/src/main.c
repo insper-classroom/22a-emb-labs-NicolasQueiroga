@@ -104,7 +104,8 @@ void get_frequency()
 void draw_frequency(int frequencia)
 {
 	char freq_str[20];
-	sprintf(freq_str, "%d ms       ", frequencia);
+	gfx_mono_draw_string("             ", 0,16, &sysfont);
+	sprintf(freq_str, "%d ms", frequencia);
 	gfx_mono_draw_string(freq_str, 0, 16, &sysfont);
 }
 
