@@ -1,5 +1,4 @@
 #include "lab5/lab5.h"
-#include <stdio.h>
 
 void main(void)
 {

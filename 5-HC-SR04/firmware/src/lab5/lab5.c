@@ -8,6 +8,11 @@ volatile uint32_t rtt_time = 0;
 // hw
 void init_sensor(void)
 {
+    // init clocks
+    pmc_enable_periph_clk(ID_PIOA);
+    pmc_enable_periph_clk(ID_PIOD);
+
+    // echo pin
     pio_configure(ECHO_PIO, PIO_INPUT, ECHO_PIO_IDX_MASK, PIO_DEFAULT);
     pio_set_debounce_filter(ECHO_PIO, ECHO_PIO_IDX_MASK, 60);
     pio_handler_set(ECHO_PIO,
@@ -20,6 +25,7 @@ void init_sensor(void)
     NVIC_EnableIRQ(ECHO_PIO_ID);
     NVIC_SetPriority(ECHO_PIO_ID, 5);
 
+    // trigger pin
     pmc_enable_periph_clk(TRIG_PIO_ID);
     pio_set_output(TRIG_PIO, TRIG_PIO_IDX_MASK, 0, 0, 1);
 }
@@ -42,9 +48,7 @@ void echo_callback(void)
             set_but2_flag(0);
         }
         else
-        {
             contact_error_flag = 1;
-        }
     }
     else
     {
