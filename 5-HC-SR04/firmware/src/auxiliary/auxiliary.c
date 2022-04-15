@@ -198,12 +198,13 @@ void RTC_Handler(void)
 // sw
 void clear_screen()
 {
-    gfx_mono_generic_draw_filled_rect(0, 0, 127, 31, GFX_PIXEL_CLR);
+    gfx_mono_generic_draw_filled_rect(0, 0, 67, 31, GFX_PIXEL_CLR);
     return;
 }
 
 void draw_string(char *text)
 {
+    clear_screen();
     gfx_mono_draw_string("            ", 0, 3, &sysfont);
     gfx_mono_draw_string(text, 0, 3, &sysfont);
 }

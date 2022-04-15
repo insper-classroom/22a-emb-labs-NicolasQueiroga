@@ -31,7 +31,7 @@ void set_contact_error_flag(_Bool val);
 uint32_t get_rtt_time(void);
 void set_rtt_time(uint32_t val);
 
+void draw_points_and_dist(float distance, int *x_cnt);
 void draw_error(char type);
-void draw_distance(float distance);
 
 #endif

@@ -39,9 +39,12 @@ void echo_callback(void)
         {
             RTT_init(FREQUENCY, 0, 0);
             echo_flag = 1;
+            set_but2_flag(0);
         }
         else
+        {
             contact_error_flag = 1;
+        }
     }
     else
     {
@@ -78,19 +81,26 @@ void set_rtt_time(uint32_t val)
     rtt_time = val;
 }
 
+void draw_points_and_dist(float distance, int *x_cnt)
+{
+    char str[20];
+    sprintf(str, "%.1fcm", distance);
+    clear_screen();
+    gfx_mono_draw_string(str, 0, 0, &sysfont);
+
+    if (*x_cnt == 0)
+        gfx_mono_generic_draw_filled_rect(70, 0, 74, 31, GFX_PIXEL_CLR);
+
+    int pos = ((-29 * distance) + 11998) / 398;
+    gfx_mono_generic_draw_horizontal_line(*x_cnt + 70, pos, 1, GFX_PIXEL_SET);
+    *x_cnt = *x_cnt >= 58 ? 0 : *x_cnt + 1;
+}
+
 void draw_error(char type)
 {
-    clear_screen();
+    gfx_mono_generic_draw_filled_rect(0, 0, 127, 31, GFX_PIXEL_CLR);
     if (type == 0)
         draw_string("DIST ERROR");
     else if (type == 1)
         draw_string("CON. ERROR");
-}
-
-void draw_distance(float distance)
-{
-    char str[20];
-    sprintf(str, "%.1f cm", distance);
-    clear_screen();
-    gfx_mono_draw_string(str, 26, 11, &sysfont);
 }
