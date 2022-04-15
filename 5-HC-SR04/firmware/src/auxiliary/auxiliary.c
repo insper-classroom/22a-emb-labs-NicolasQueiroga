@@ -61,7 +61,7 @@ void init(void)
 
     // led2
     pio_configure(LED2_PIO, PIO_OUTPUT_0, LED2_PIO_IDX_MASK, PIO_DEFAULT);
-    pio_set(LED2_PIO, LED2_PIO_IDX_MASK);
+    pio_clear(LED2_PIO, LED2_PIO_IDX_MASK);
 }
 
 // handlers ----
