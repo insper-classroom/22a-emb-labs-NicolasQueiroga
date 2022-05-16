@@ -13,6 +13,7 @@ static lv_obj_t *labelConfig;
 static lv_obj_t *labelUp;
 static lv_obj_t *labelDn;
 static lv_obj_t *labelFloor;
+static lv_obj_t *labelFloor_dec;
 static lv_obj_t *labelClock;
 static lv_obj_t *labelTemp;
 
@@ -142,10 +143,16 @@ void lv_termostato(void)
     //
 
     labelFloor = lv_label_create(lv_scr_act());
-    lv_obj_align(labelFloor, LV_ALIGN_LEFT_MID, 35, -20);
+    lv_obj_align(labelFloor, LV_ALIGN_LEFT_MID, 25, -20);
     lv_obj_set_style_text_font(labelFloor, &dseg70, LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(labelFloor, lv_color_white(), LV_STATE_DEFAULT);
     lv_label_set_text_fmt(labelFloor, "%02d", 23);
+
+    labelFloor_dec = lv_label_create(lv_scr_act());
+    lv_obj_align_to(labelFloor_dec, labelFloor, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
+    lv_obj_set_style_text_font(labelFloor_dec, &dseg50, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(labelFloor_dec, lv_color_white(), LV_STATE_DEFAULT);
+    lv_label_set_text_fmt(labelFloor_dec, ".%01d", 1);
 
     //
 
