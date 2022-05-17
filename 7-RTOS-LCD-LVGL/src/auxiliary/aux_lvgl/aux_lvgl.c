@@ -1,4 +1,10 @@
 #include "aux_lvgl.h"
+#include "auxiliary/aux_rtos/aux_rtos.h"
+#include "auxiliary/aux_time/aux_time.h"
+
+// global variables
+volatile _Bool edit_clk = 0;
+
 
 // buffers
 static lv_disp_draw_buf_t disp_buf;
@@ -18,11 +24,6 @@ static lv_obj_t *labelClock;
 static lv_obj_t *labelTemp;
 
 // labels getters
-// lv_obj_t *get_labelPwr(void) { return labelPwr; }
-// lv_obj_t *get_labelMenu(void) { return labelMenu; }
-// lv_obj_t *get_labelConfig(void) { return labelConfig; }
-// lv_obj_t *get_labelUp(void) { return labelUp; }
-// lv_obj_t *get_labelDn(void) { return labelDn; }
 lv_obj_t *get_label_floor(void) { return labelFloor; }
 lv_obj_t *get_label_clock(void) { return labelClock; }
 lv_obj_t *get_label_temp(void) { return labelTemp; }
@@ -47,11 +48,27 @@ void up_handler(lv_event_t *e)
     lv_event_code_t code = lv_event_get_code(e);
     char *c;
     int temp;
+    uint32_t current_hour, current_min, current_sec;
     if (code == LV_EVENT_CLICKED)
     {
-        c = lv_label_get_text(labelTemp);
-        temp = atoi(c);
-        lv_label_set_text_fmt(labelTemp, "%02d", temp + 1);
+        if (!edit_clk)
+        {
+            c = lv_label_get_text(labelTemp);
+            temp = atoi(c);
+            lv_label_set_text_fmt(labelTemp, "%02d", temp + 1);
+        }
+        else
+        {
+            rtc_get_time(RTC, &current_hour, &current_min, &current_sec);
+            if (current_min == 59)
+            {
+                current_min = 0;
+                current_hour++;
+            }
+            else
+                current_min++;
+            rtc_set_time(RTC, current_hour, current_min, current_sec);
+        }
     }
 }
 
@@ -60,12 +77,35 @@ void dn_handler(lv_event_t *e)
     lv_event_code_t code = lv_event_get_code(e);
     char *c;
     int temp;
+    uint32_t current_hour, current_min, current_sec;
     if (code == LV_EVENT_CLICKED)
     {
-        c = lv_label_get_text(labelTemp);
-        temp = atoi(c);
-        lv_label_set_text_fmt(labelTemp, "%02d", temp - 1);
+        if (!edit_clk)
+        {
+            c = lv_label_get_text(labelTemp);
+            temp = atoi(c);
+            lv_label_set_text_fmt(labelTemp, "%02d", temp - 1);
+        }
+        else
+        {
+            rtc_get_time(RTC, &current_hour, &current_min, &current_sec);
+            if (current_min == 0)
+            {
+                current_min = 59;
+                current_hour--;
+            }
+            else
+                current_min--;
+            rtc_set_time(RTC, current_hour, current_min, current_sec);
+        }
     }
+}
+
+void set_clk_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if (code == LV_EVENT_CLICKED)
+        edit_clk = !edit_clk;
 }
 
 void create_btn(lv_obj_t *parent, lv_obj_t *label, lv_event_cb_t event_handler, lv_obj_t **btn, lv_event_code_t filter, int width, int height)
@@ -74,7 +114,6 @@ void create_btn(lv_obj_t *parent, lv_obj_t *label, lv_event_cb_t event_handler, 
     lv_obj_set_size(*btn, width, height);
     lv_obj_add_event_cb(*btn, event_handler, filter, NULL);
 }
-
 
 // screen
 void lv_termostato(void)
@@ -110,7 +149,7 @@ void lv_termostato(void)
     //
 
     lv_obj_t *config;
-    create_btn(lv_scr_act(), labelConfig, event_handler, &config, LV_EVENT_ALL, 60, 60);
+    create_btn(lv_scr_act(), labelConfig, set_clk_handler, &config, LV_EVENT_ALL, 60, 60);
     lv_obj_align_to(config, menu, LV_ALIGN_OUT_RIGHT_TOP, 0, 2);
     lv_obj_add_style(config, &style, 0);
 

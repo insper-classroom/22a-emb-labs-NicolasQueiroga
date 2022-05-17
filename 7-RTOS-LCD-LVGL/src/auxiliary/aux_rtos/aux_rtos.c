@@ -10,7 +10,7 @@ volatile SemaphoreHandle_t xSemaphoreRTC;
 // getters & setters
 SemaphoreHandle_t get_xSemaphoreRTC(void)
 {
-    return xSemaphoreRTC;
+  return xSemaphoreRTC;
 }
 
 // rtos functions
@@ -42,6 +42,7 @@ void task_update_clk(void *pvParameters)
 {
   // RTC
   Calendar rtc_initial = {2022, 3, 19, 12, 15, 45, 1};
+  set_cal(rtc_initial);
   RTC_init(RTC, ID_RTC, rtc_initial, RTC_SR_SEC | RTC_SR_ALARM);
   uint32_t current_hour, current_min, current_sec;
 
@@ -51,7 +52,7 @@ void task_update_clk(void *pvParameters)
     if (xSemaphoreTake(xSemaphoreRTC, 1000 / portTICK_PERIOD_MS))
       lv_label_set_text_fmt(get_label_clock(), "%02d:%02d", current_hour, current_min);
     else
-       lv_label_set_text_fmt(get_label_clock(), "%02d %02d", current_hour, current_min);
+      lv_label_set_text_fmt(get_label_clock(), "%02d %02d", current_hour, current_min);
   }
 }
 

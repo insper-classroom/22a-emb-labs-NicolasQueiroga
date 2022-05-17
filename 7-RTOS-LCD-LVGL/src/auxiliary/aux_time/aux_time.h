@@ -21,6 +21,9 @@ void set_rtc_second_flag(_Bool val);
 _Bool get_rtc_alarm_flag(void);
 void set_rtc_alarm_flag(_Bool val);
 
+void set_cal(Calendar val);
+Calendar get_cal(void);
+
 // inits
 void RTC_init(Rtc *rtc, uint32_t id_rtc, Calendar t, uint32_t irq_type);
 

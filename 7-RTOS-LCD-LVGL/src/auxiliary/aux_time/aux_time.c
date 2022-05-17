@@ -4,6 +4,7 @@
 // globals
 volatile _Bool flag_rtc_second = 0;
 volatile _Bool flag_rtc_alarm = 0;
+volatile Calendar cal;
 
 // getters & setters
 _Bool get_rtc_second_flag(void)
@@ -22,6 +23,15 @@ _Bool get_rtc_alarm_flag(void)
 void set_rtc_alarm_flag(_Bool val)
 {
     flag_rtc_alarm = val;
+}
+
+Calendar get_cal(void)
+{
+    return cal;
+}
+void set_cal(Calendar val)
+{
+    cal = val;
 }
 
 // inits
