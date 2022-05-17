@@ -4,7 +4,7 @@
 
 // global variables
 volatile _Bool edit_clk = 0;
-
+volatile _Bool display_off = 0;
 
 // buffers
 static lv_disp_draw_buf_t disp_buf;
@@ -22,6 +22,10 @@ static lv_obj_t *labelFloor;
 static lv_obj_t *labelFloor_dec;
 static lv_obj_t *labelClock;
 static lv_obj_t *labelTemp;
+static lv_obj_t *labelFloor_txt;
+static lv_obj_t *labelSetTemp_txt;
+static lv_obj_t *labelSettings;
+static lv_obj_t *labelHouseLogo;
 
 // labels getters
 lv_obj_t *get_label_floor(void) { return labelFloor; }
@@ -40,6 +44,25 @@ void event_handler(lv_event_t *e)
     else if (code == LV_EVENT_VALUE_CHANGED)
     {
         LV_LOG_USER("Toggled");
+    }
+}
+
+void display_handler(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if (code == LV_EVENT_CLICKED)
+    {
+        display_off = !display_off;
+        if (!display_off)
+        {
+            lv_obj_clean(lv_scr_act());
+            screen_off();
+        }
+        else
+        {
+            lv_obj_clean(lv_scr_act());
+            lv_termostato();
+        }
     }
 }
 
@@ -116,8 +139,28 @@ void create_btn(lv_obj_t *parent, lv_obj_t *label, lv_event_cb_t event_handler, 
 }
 
 // screen
+void screen_off(void)
+{
+    static lv_style_t style;
+    lv_style_init(&style);
+    lv_style_set_bg_color(&style, lv_palette_main(LV_PALETTE_NONE));
+    lv_style_set_border_color(&style, lv_palette_main(LV_PALETTE_NONE));
+    lv_style_set_border_width(&style, 5);
+
+    lv_obj_t *pwr;
+    create_btn(lv_scr_act(), labelPwr, display_handler, &pwr, LV_EVENT_ALL, 60, 60);
+    lv_obj_align(pwr, LV_ALIGN_BOTTOM_LEFT, 0, 0);
+    lv_obj_add_style(pwr, &style, 0);
+
+    labelPwr = lv_label_create(pwr);
+    lv_label_set_text(labelPwr, LV_SYMBOL_POWER);
+    lv_obj_center(labelPwr);
+}
+
 void lv_termostato(void)
 {
+    lv_obj_clean(lv_scr_act());
+
     static lv_style_t style;
     lv_style_init(&style);
     lv_style_set_bg_color(&style, lv_palette_main(LV_PALETTE_NONE));
@@ -127,7 +170,7 @@ void lv_termostato(void)
     //
 
     lv_obj_t *pwr;
-    create_btn(lv_scr_act(), labelPwr, event_handler, &pwr, LV_EVENT_ALL, 60, 60);
+    create_btn(lv_scr_act(), labelPwr, display_handler, &pwr, LV_EVENT_ALL, 60, 60);
     lv_obj_align(pwr, LV_ALIGN_BOTTOM_LEFT, 0, 0);
     lv_obj_add_style(pwr, &style, 0);
 
@@ -208,6 +251,14 @@ void lv_termostato(void)
     lv_obj_set_style_text_font(labelTemp, &dseg50, LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(labelTemp, lv_color_white(), LV_STATE_DEFAULT);
     lv_label_set_text_fmt(labelTemp, "%02d", 22);
+
+    //
+
+    labelFloor_txt = lv_label_create(lv_scr_act());
+    lv_obj_align_to(labelFloor_txt, labelFloor, LV_ALIGN_OUT_LEFT_MID, 0, 0);
+    lv_obj_set_style_text_font(labelFloor_txt, &dseg50, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(labelFloor_txt, lv_color_white(), LV_STATE_DEFAULT);
+    lv_label_set_text_fmt(labelFloor_txt, "FLOOR\nTEMP");
 }
 
 // setup

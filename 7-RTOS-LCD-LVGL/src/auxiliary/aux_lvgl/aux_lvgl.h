@@ -27,6 +27,7 @@ void up_handler(lv_event_t *e);
 void dn_handler(lv_event_t *e);
 
 // screen
+void screen_off(void);
 void lv_termostato(void);
 
 // setup
