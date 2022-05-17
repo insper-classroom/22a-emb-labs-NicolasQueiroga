@@ -6,6 +6,17 @@
 #define TASK_LCD_STACK_SIZE (1024 * 6 / sizeof(portSTACK_TYPE))
 #define TASK_LCD_STACK_PRIORITY (tskIDLE_PRIORITY)
 
+#define TASK_ADC_STACK_SIZE (1024 * 10 / sizeof(portSTACK_TYPE))
+#define TASK_ADC_STACK_PRIORITY (tskIDLE_PRIORITY)
+
+#define TASK_PROC_STACK_SIZE (1024 * 10 / sizeof(portSTACK_TYPE))
+#define TASK_PROC_STACK_PRIORITY (tskIDLE_PRIORITY)
+
+typedef struct
+{
+    uint value;
+} adcData;
+
 // getters & setters
 void create_xSemaphoreRTC();
 SemaphoreHandle_t get_xSemaphoreRTC(void);

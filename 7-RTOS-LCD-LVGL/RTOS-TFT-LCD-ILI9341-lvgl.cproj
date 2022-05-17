@@ -2309,6 +2309,9 @@
     <Compile Include="src\auxiliary\aux_time\aux_time.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\clock.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\config\conf_touch.h">
       <SubType>compile</SubType>
     </Compile>
@@ -2322,6 +2325,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\dseg70.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\steam.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\touch\touch.c">

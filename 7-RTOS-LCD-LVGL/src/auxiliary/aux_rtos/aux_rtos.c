@@ -6,6 +6,7 @@
 volatile SemaphoreHandle_t xSemaphoreRTC;
 
 // queues
+volatile QueueHandle_t xQueueADC, xQueuePROC;
 
 // getters & setters
 SemaphoreHandle_t get_xSemaphoreRTC(void)

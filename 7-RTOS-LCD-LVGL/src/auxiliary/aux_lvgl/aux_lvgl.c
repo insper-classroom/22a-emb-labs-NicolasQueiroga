@@ -1,6 +1,8 @@
 #include "aux_lvgl.h"
 #include "auxiliary/aux_rtos/aux_rtos.h"
 #include "auxiliary/aux_time/aux_time.h"
+#include "clock.h"
+#include "steam.h"
 
 // global variables
 volatile _Bool edit_clk = 0;
@@ -186,25 +188,30 @@ void lv_termostato(void)
     lv_obj_add_style(menu, &style, 0);
 
     labelMenu = lv_label_create(menu);
-    lv_label_set_text(labelMenu, "| M |");
+    lv_label_set_text(labelMenu, "| M");
     lv_obj_center(labelMenu);
 
     //
 
-    lv_obj_t *config;
-    create_btn(lv_scr_act(), labelConfig, set_clk_handler, &config, LV_EVENT_ALL, 60, 60);
-    lv_obj_align_to(config, menu, LV_ALIGN_OUT_RIGHT_TOP, 0, 2);
-    lv_obj_add_style(config, &style, 0);
+    // lv_obj_t *config;
+    // create_btn(lv_scr_act(), labelConfig, set_clk_handler, &config, LV_EVENT_ALL, 60, 60);
+    // lv_obj_align_to(config, menu, LV_ALIGN_OUT_RIGHT_TOP, 0, 2);
+    // lv_obj_add_style(config, &style, 0);
 
-    labelConfig = lv_label_create(config);
-    lv_label_set_text(labelConfig, LV_SYMBOL_SETTINGS " ]");
-    lv_obj_center(labelConfig);
+    lv_obj_t *clk = lv_imgbtn_create(lv_scr_act());
+    lv_obj_add_event_cb(clk, set_clk_handler, LV_EVENT_ALL, NULL);
+	lv_imgbtn_set_src(clk, LV_IMGBTN_STATE_RELEASED, &clock, NULL, NULL);
+	lv_obj_align_to(clk, menu, LV_ALIGN_OUT_RIGHT_MID, 0, 45);
+
+    // labelConfig = lv_label_create(config);
+    // lv_label_set_text(labelConfig, LV_SYMBOL_SETTINGS " ]");
+    // lv_obj_center(labelConfig);
 
     //
 
     lv_obj_t *up;
     create_btn(lv_scr_act(), labelUp, up_handler, &up, LV_EVENT_ALL, 60, 60);
-    lv_obj_align_to(up, config, LV_ALIGN_OUT_RIGHT_TOP, 10, 0);
+    lv_obj_align_to(up, clk, LV_ALIGN_OUT_RIGHT_TOP, -48, -14);
     lv_obj_add_style(up, &style, 0);
 
     labelUp = lv_label_create(up);
