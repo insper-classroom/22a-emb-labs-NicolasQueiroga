@@ -28,6 +28,8 @@ static lv_obj_t *labelFloor_txt;
 static lv_obj_t *labelSetTemp_txt;
 static lv_obj_t *labelSettings;
 static lv_obj_t *labelHouseLogo;
+static lv_obj_t *labelHome;
+static lv_obj_t *labelClk;
 
 // labels getters
 lv_obj_t *get_label_floor(void) { return labelFloor; }
@@ -188,7 +190,7 @@ void lv_termostato(void)
     lv_obj_add_style(menu, &style, 0);
 
     labelMenu = lv_label_create(menu);
-    lv_label_set_text(labelMenu, "| M");
+    lv_label_set_text(labelMenu, "| M | ");
     lv_obj_center(labelMenu);
 
     //
@@ -196,7 +198,12 @@ void lv_termostato(void)
     lv_obj_t *clk = lv_imgbtn_create(lv_scr_act());
     lv_obj_add_event_cb(clk, set_clk_handler, LV_EVENT_ALL, NULL);
 	lv_imgbtn_set_src(clk, LV_IMGBTN_STATE_RELEASED, &clock, NULL, NULL);
-	lv_obj_align_to(clk, menu, LV_ALIGN_OUT_RIGHT_MID, 0, 45);
+	lv_obj_align_to(clk, menu, LV_ALIGN_OUT_RIGHT_MID, 0, 55);
+
+    labelClk = lv_label_create(lv_scr_act());
+    lv_obj_add_style(labelClk, &style, 0);
+    lv_obj_align_to(labelClk, pwr, LV_ALIGN_OUT_RIGHT_MID, 83, 0);
+    lv_label_set_text_fmt(labelClk, "]");
 
     //
 
@@ -214,7 +221,19 @@ void lv_termostato(void)
     lv_obj_t *steamm = lv_imgbtn_create(lv_scr_act());
     lv_obj_add_event_cb(steamm, event_handler, LV_EVENT_ALL, NULL);
 	lv_imgbtn_set_src(steamm, LV_IMGBTN_STATE_RELEASED, &steam, NULL, NULL);
-	lv_obj_align_to(steamm, up, LV_ALIGN_OUT_RIGHT_MID, 0, -20);
+	lv_obj_align_to(steamm, up, LV_ALIGN_OUT_RIGHT_MID, 10, -24);
+
+    lv_obj_t *clk_img = lv_imgbtn_create(lv_scr_act());
+    lv_obj_add_event_cb(clk_img, event_handler, LV_EVENT_ALL, NULL);
+	lv_imgbtn_set_src(clk_img, LV_IMGBTN_STATE_RELEASED, &clock, NULL, NULL);
+	lv_obj_align_to(clk_img, up, LV_ALIGN_OUT_RIGHT_MID, -20, -20);
+
+    //
+
+    labelHome = lv_label_create(lv_scr_act());
+	lv_obj_align(labelHome, LV_ALIGN_RIGHT_MID, -130 , 48);
+	lv_label_set_text(labelHome, LV_SYMBOL_HOME);
+	lv_obj_set_style_text_color(labelHome, lv_color_white(), LV_STATE_DEFAULT);
 
     //
 
