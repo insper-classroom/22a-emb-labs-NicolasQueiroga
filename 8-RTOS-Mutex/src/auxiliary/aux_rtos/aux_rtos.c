@@ -4,6 +4,7 @@
 
 // semaphores
 volatile SemaphoreHandle_t xSemaphoreRTC;
+volatile SemaphoreHandle_t xSemaphoreMutex;
 
 // queues
 volatile QueueHandle_t xQueueADC, xQueuePROC;
@@ -12,6 +13,10 @@ volatile QueueHandle_t xQueueADC, xQueuePROC;
 SemaphoreHandle_t get_xSemaphoreRTC(void)
 {
   return xSemaphoreRTC;
+}
+SemaphoreHandle_t get_xSemaphoreMutex(void)
+{
+	return xSemaphoreMutex;
 }
 
 // rtos functions
@@ -33,8 +38,10 @@ void task_lcd(void *pvParameters)
 
   while (1)
   {
+	xSemaphoreTake(xSemaphoreMutex, portMAX_DELAY);
     lv_tick_inc(50);
     lv_task_handler();
+	xSemaphoreGive(xSemaphoreMutex);
     vTaskDelay(50);
   }
 }
@@ -62,6 +69,7 @@ void init_rtos(void)
 {
   // create semaphores
   xSemaphoreRTC = xSemaphoreCreateBinary();
+  xSemaphoreMutex = xSemaphoreCreateMutex();
 
   // create tasks
   xTaskCreate(task_lcd, "lcd", TASK_LCD_STACK_SIZE, NULL, TASK_LCD_STACK_PRIORITY, NULL);

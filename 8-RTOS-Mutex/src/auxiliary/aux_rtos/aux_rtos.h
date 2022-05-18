@@ -18,8 +18,8 @@ typedef struct
 } adcData;
 
 // getters & setters
-void create_xSemaphoreRTC();
 SemaphoreHandle_t get_xSemaphoreRTC(void);
+SemaphoreHandle_t get_xSemaphoreMutex(void);
 
 // rtos functions
 void vApplicationStackOverflowHook(xTaskHandle *pxTask, signed char *pcTaskName);
