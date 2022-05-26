@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "gfx_mono_text.h": "c",
+        "aux_time.h": "c"
+    }
+}

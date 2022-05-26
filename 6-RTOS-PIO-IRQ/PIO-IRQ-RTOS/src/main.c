@@ -57,8 +57,7 @@
 #define TASK_BUT_STACK_SIZE (2048 / sizeof(portSTACK_TYPE))
 #define TASK_BUT_STACK_PRIORITY (tskIDLE_PRIORITY)
 
-extern void vApplicationStackOverflowHook(xTaskHandle *pxTask,
-                                          signed char *pcTaskName);
+extern void vApplicationStackOverflowHook(xTaskHandle *pxTask, signed char *pcTaskName);
 extern void vApplicationIdleHook(void);
 extern void vApplicationTickHook(void);
 extern void vApplicationMallocFailedHook(void);
@@ -91,42 +90,15 @@ void LED_init(int estado);
 /* RTOS application funcs                                               */
 /************************************************************************/
 
-/**
- * \brief Called if stack overflow during execution
- */
-extern void vApplicationStackOverflowHook(xTaskHandle *pxTask,
-                                          signed char *pcTaskName)
+extern void vApplicationStackOverflowHook(xTaskHandle *pxTask, signed char *pcTaskName)
 {
   printf("stack overflow %x %s\r\n", pxTask, (portCHAR *)pcTaskName);
-  /* If the parameters have been corrupted then inspect pxCurrentTCB to
-   * identify which task has overflowed its stack.
-   */
-  for (;;)
-  {
-  }
+  while (1)
+    ;
 }
-
-/**
- * \brief This function is called by FreeRTOS idle task
- */
 extern void vApplicationIdleHook(void) { pmc_sleep(SAM_PM_SMODE_SLEEP_WFI); }
-
-/**
- * \brief This function is called by FreeRTOS each tick
- */
 extern void vApplicationTickHook(void) {}
-
-extern void vApplicationMallocFailedHook(void)
-{
-  /* Called if a call to pvPortMalloc() fails because there is insufficient
-  free memory available in the FreeRTOS heap.  pvPortMalloc() is called
-  internally by FreeRTOS API functions that create tasks, queues, software
-  timers, and semaphores.  The size of the FreeRTOS heap is set by the
-  configTOTAL_HEAP_SIZE configuration constant in FreeRTOSConfig.h. */
-
-  /* Force an assert. */
-  configASSERT((volatile void *)NULL);
-}
+extern void vApplicationMallocFailedHook(void) { configASSERT((volatile void *)NULL); }
 
 /************************************************************************/
 /* handlers / callbacks                                                 */
@@ -160,7 +132,7 @@ void but3_callback(void)
 /* TASKS                                                                */
 /************************************************************************/
 
-static void task_led(void *pvParameters)
+void task_led(void *pvParameters)
 {
 
   LED_init(1);
@@ -168,16 +140,10 @@ static void task_led(void *pvParameters)
   uint32_t msg = 0;
   uint32_t delayMs = 2000;
 
-  /* tarefas de um RTOS n�o devem retornar */
   for (;;)
   {
-    /* verifica se chegou algum dado na queue, e espera por 0 ticks */
     if (xQueueReceive(xQueueLedFreq, &msg, (TickType_t)0))
     {
-      /* chegou novo valor, atualiza delay ! */
-      /* aqui eu poderia verificar se msg faz sentido (se esta no range certo)
-       */
-      /* converte ms -> ticks */
       delayMs = msg / portTICK_PERIOD_MS;
       printf("delay = %d \n", delayMs);
     }
@@ -190,7 +156,7 @@ static void task_led(void *pvParameters)
   }
 }
 
-static void task_but(void *pvParameters)
+void task_but(void *pvParameters)
 {
 
   uint32_t delayTicks = 2000;
@@ -326,20 +292,14 @@ void init(void)
 /* main                                                                 */
 /************************************************************************/
 
-/**
- *  \brief FreeRTOS Real Time Kernel example entry point.
- *
- *  \return Unused (ANSI-C compatibility).
- */
 int main(void)
 {
-  /* Initialize the SAM system */
   init();
 
-  /* Attempt to create a semaphore. */
   xQueueBut = xQueueCreate(32, sizeof(char));
   if (xQueueBut == NULL)
     printf("falha em criar a queue \n");
+
   xSemaphoreBut1 = xSemaphoreCreateBinary();
   if (xSemaphoreBut1 == NULL)
     printf("falha em criar o semaforo \n");
@@ -348,36 +308,17 @@ int main(void)
   if (xSemaphoreBut3 == NULL)
     printf("falha em criar o semaforo \n");
 
-  /* cria queue com 32 "espacos" */
-  /* cada espa�o possui o tamanho de um inteiro*/
   xQueueLedFreq = xQueueCreate(32, sizeof(uint32_t));
   if (xQueueLedFreq == NULL)
     printf("falha em criar a queue \n");
 
-
-  /* Create task to make led blink */
-  if (xTaskCreate(task_led, "Led", TASK_LED_STACK_SIZE, NULL,
-                  TASK_LED_STACK_PRIORITY, NULL) != pdPASS)
-  {
+  if (xTaskCreate(task_led, "Led", TASK_LED_STACK_SIZE, NULL, TASK_LED_STACK_PRIORITY, NULL) != pdPASS)
     printf("Failed to create test led task\r\n");
-  }
 
-  /* Create task to monitor processor activity */
-  if (xTaskCreate(task_but, "BUT", TASK_BUT_STACK_SIZE, NULL,
-                  TASK_BUT_STACK_PRIORITY, NULL) != pdPASS)
-  {
+  if (xTaskCreate(task_but, "BUT", TASK_BUT_STACK_SIZE, NULL, TASK_BUT_STACK_PRIORITY, NULL) != pdPASS)
     printf("Failed to create UartTx task\r\n");
-  }
 
-  /* Start the scheduler. */
   vTaskStartScheduler();
 
-  /* RTOS n�o deve chegar aqui !! */
-  while (1)
-  {
-  }
-
-  /* Will only get here if there was insufficient memory to create the idle
-   * task. */
   return 0;
 }
